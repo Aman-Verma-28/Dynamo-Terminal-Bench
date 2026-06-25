@@ -1,0 +1,9 @@
+# Harbor run output
+jobs/
+log-report/jobs/
+
+# the original broken bundle — not part of the fixed task
+fix-task-broken.tar.gz
+
+# macOS
+.DS_Store

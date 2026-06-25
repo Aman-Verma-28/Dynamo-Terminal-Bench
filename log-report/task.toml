@@ -1,0 +1,32 @@
+artifacts = ["/app/report.json"]
+
+[task]
+name = "dynamo/log-report"
+description = "Parse an Apache-style access log into a small JSON summary report."
+
+[metadata]
+category = "data_processing_and_etl"
+subcategory = "text_processing"
+task_objective = ["transform", "generate"]
+artifact_type = ["text_or_log_file", "generated_output_artifact"]
+expert_time_estimate_hours = 0.75
+model_tested = "GPT-5.4"
+agent_tested = "Terminus-2"
+difficulty_explanation = "The log mixes combined/common formats with malformed lines, and the six report fields each hinge on a precise, easy-to-miss rule: bot exclusion for unique visitors, ordered path normalization plus a 2xx/3xx filter and lexicographic tie-break for the top path, '-' bytes treated as zero, per-line timezone conversion to UTC with an earliest-hour tie-break for the busiest hour, and round-half-to-even rounding for the error rate. Getting every field right at once is the challenge; missing any single rule fails the verifier."
+solution_explanation = "Parse each line with a regex for the combined/common format, skipping blanks, comments, and lines whose request field is not METHOD PATH PROTOCOL or whose size is not digits/'-'. Compute the six fields per the stated rules using only the standard library (re, datetime/timezone, urllib.parse.unquote, decimal for banker's rounding)."
+verification_explanation = "pytest parses /app/report.json and asserts each of the six computed values (plus valid-JSON structure) against the reference solver's known-correct output for the bundled access.log. The values are produced by running the oracle, not hardcoded by hand; reward is 1 only when all assertions pass. A wrong value in any single field yields reward 0."
+
+[verifier]
+timeout_sec = 600.0
+
+[agent]
+timeout_sec = 600.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
